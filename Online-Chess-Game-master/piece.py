@@ -42,6 +42,7 @@ class Piece:
         self.move_list = []
         self.king = False
         self.pawn = False
+        self.has_moved = False  # Thêm thuộc tính này để kiểm tra xem quân cờ đã di chuyển hay chưa
 
     def isSelected(self):
         return self.selected
@@ -66,6 +67,7 @@ class Piece:
     def change_pos(self, pos):
         self.row = pos[0]
         self.col = pos[1]
+        self.has_moved = True  # Cập nhật trạng thái di chuyển
 
     def __str__(self):
         return str(self.col) + " " + str(self.row)
@@ -155,6 +157,11 @@ class King(Piece):
         self.king = True
 
     def valid_moves(self, board):
+        moves = self.standard_moves(board)
+        moves.extend(self.castling_moves(board))
+        return moves
+
+    def standard_moves(self, board):
         i = self.row
         j = self.col
 
@@ -164,67 +171,120 @@ class King(Piece):
             # TOP LEFT
             if j > 0:
                 p = board[i - 1][j - 1]
-                if p == 0:
-                    moves.append((j - 1, i - 1,))
-                elif p.color != self.color:
-                    moves.append((j - 1, i - 1,))
+                if p == 0 or p.color != self.color:
+                    moves.append((j - 1, i - 1))
 
             # TOP MIDDLE
             p = board[i - 1][j]
-            if p == 0:
-                moves.append((j, i - 1))
-            elif p.color != self.color:
+            if p == 0 or p.color != self.color:
                 moves.append((j, i - 1))
 
             # TOP RIGHT
             if j < 7:
                 p = board[i - 1][j + 1]
-                if p == 0:
-                    moves.append((j + 1, i - 1,))
-                elif p.color != self.color:
-                    moves.append((j + 1, i - 1,))
+                if p == 0 or p.color != self.color:
+                    moves.append((j + 1, i - 1))
 
         if i < 7:
             # BOTTOM LEFT
             if j > 0:
                 p = board[i + 1][j - 1]
-                if p == 0:
-                    moves.append((j - 1, i + 1,))
-                elif p.color != self.color:
-                    moves.append((j - 1, i + 1,))
+                if p == 0 or p.color != self.color:
+                    moves.append((j - 1, i + 1))
 
             # BOTTOM MIDDLE
             p = board[i + 1][j]
-            if p == 0:
-                moves.append((j, i + 1))
-            elif p.color != self.color:
+            if p == 0 or p.color != self.color:
                 moves.append((j, i + 1))
 
             # BOTTOM RIGHT
             if j < 7:
                 p = board[i + 1][j + 1]
-                if p == 0:
-                    moves.append((j + 1, i + 1))
-                elif p.color != self.color:
+                if p == 0 or p.color != self.color:
                     moves.append((j + 1, i + 1))
 
         # MIDDLE LEFT
         if j > 0:
             p = board[i][j - 1]
-            if p == 0:
-                moves.append((j - 1, i))
-            elif p.color != self.color:
+            if p == 0 or p.color != self.color:
                 moves.append((j - 1, i))
 
         # MIDDLE RIGHT
         if j < 7:
             p = board[i][j + 1]
-            if p == 0:
-                moves.append((j + 1, i))
-            elif p.color != self.color:
+            if p == 0 or p.color != self.color:
                 moves.append((j + 1, i))
 
         return moves
+
+    def castling_moves(self, board):
+        moves = []
+        if self.has_moved:
+            return moves  # Vua đã di chuyển, không thể nhập thành
+
+        # Kiểm tra nhập thành cánh vua (castling kingside)
+        if self.col == 4:
+            if all(board[self.row][col] == 0 for col in range(5, 7)):  # Các ô giữa vua và xe đều trống
+                rook = board[self.row][7]
+                if isinstance(rook, Rook) and not rook.has_moved:
+                    # Kiểm tra các ô giữa không bị kiểm soát
+                    if not any(self.is_under_attack(board, self.row, col) for col in range(4, 7)):
+                        moves.append((self.row, 6))  # Vị trí đích của vua sau khi nhập thành
+
+            # Kiểm tra nhập thành cánh hậu (castling queenside)
+            if all(board[self.row][col] == 0 for col in range(1, 4)):  # Các ô giữa vua và xe đều trống
+                rook = board[self.row][0]
+                if isinstance(rook, Rook) and not rook.has_moved:
+                    # Kiểm tra các ô giữa không bị kiểm soát
+                    if not any(self.is_under_attack(board, self.row, col) for col in range(2, 5)):
+                        moves.append((self.row, 2))  # Vị trí đích của vua sau khi nhập thành
+
+        return moves
+
+    def is_under_attack(self, board, row, col):
+        opponent_color = "w" if self.color == "b" else "b"
+        for r in range(8):
+            for c in range(8):
+                piece = board[r][c]
+                if piece != 0 and piece.color == opponent_color:
+                    if (col, row) in piece.valid_moves(board):
+                        return True
+        return False
+
+    def castling_moves(self, board):
+        moves = []
+        if self.has_moved:
+            return moves  # Vua đã di chuyển, không thể nhập thành
+
+        # Kiểm tra nhập thành cánh vua (castling kingside)
+        if self.col == 4:
+            if all(board[self.row][col] == 0 for col in range(5, 7)):  # Các ô giữa vua và xe đều trống
+                rook = board[self.row][7]
+                if isinstance(rook, Rook) and not rook.has_moved:
+                    # Kiểm tra các ô giữa không bị kiểm soát
+                    if not any(self.is_under_attack(board, self.row, col, self.color) for col in range(4, 7)):
+                        moves.append((self.row, 6))  # Vị trí đích của vua sau khi nhập thành
+
+            # Kiểm tra nhập thành cánh hậu (castling queenside)
+            if all(board[self.row][col] == 0 for col in range(1, 4)):  # Các ô giữa vua và xe đều trống
+                rook = board[self.row][0]
+                if isinstance(rook, Rook) and not rook.has_moved:
+                    # Kiểm tra các ô giữa không bị kiểm soát
+                    if not any(self.is_under_attack(board, self.row, col, self.color) for col in range(2, 5)):
+                        moves.append((self.row, 2))  # Vị trí đích của vua sau khi nhập thành
+
+        return moves
+
+    def is_under_attack(self, board, row, col, color):
+        # Giả sử có hàm kiểm tra xem ô này có bị tấn công bởi quân đối phương hay không
+        opponent_color = "w" if color == "b" else "b"
+        for r in range(8):
+            for c in range(8):
+                piece = board[r][c]
+                if piece != 0 and piece.color == opponent_color:
+                    if (col, row) in piece.valid_moves(board):
+                        return True
+        return False
 
 
 class Knight(Piece):
@@ -489,6 +549,10 @@ class Queen(Piece):
 
 class Rook(Piece):
     img = 5
+
+    def __init__(self, row, col, color):
+        super().__init__(row, col, color)
+        self.has_moved = False
 
     def valid_moves(self, board):
         i = self.row

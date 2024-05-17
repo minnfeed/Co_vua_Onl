@@ -75,12 +75,18 @@ class Board:
 
         self.startTime = time.time()
 
+    # Hàm này cập nhật các nước đi hợp lệ cho tất cả các quân cờ trên bàn cờ.
+# Nó duyệt qua tất cả các ô trên bàn cờ, và nếu một ô chứa một quân cờ, nó cập nhật các nước đi hợp lệ cho quân cờ đó.
     def update_moves(self):
         for i in range(self.rows):
             for j in range(self.cols):
                 if self.board[i][j] != 0:
                     self.board[i][j].update_valid_moves(self.board)
 
+
+# Hàm này vẽ bàn cờ và tất cả các quân cờ trên cửa sổ pygame đã cho.
+# Nếu có một nước đi cuối cùng và màu sắc của người chơi hiện tại khớp với màu sắc đã cho, nó cũng vẽ hai hình tròn xanh lên nước đi cuối cùng.
+# Nó duyệt qua tất cả các ô trên bàn cờ, và nếu một ô chứa một quân cờ, nó vẽ quân cờ đó.
     def draw(self, win, color):
         if self.last and color == self.turn:
             y, x = self.last[0]
@@ -113,6 +119,8 @@ class Board:
 
         return danger_moves
 
+    # Hàm này kiểm tra xem vua của người chơi với màu sắc đã cho có bị chiếu không.
+# Nó có thể tìm vị trí của vua trên bàn cờ, sau đó sử dụng hàm get_danger_moves để xem vị trí của vua có nằm trong danh sách các nước đi nguy hiểm không.
     def is_checked(self, color):
         self.update_moves()
         danger_moves = self.get_danger_moves(color)
@@ -196,13 +204,17 @@ class Board:
                 self.turn = "w"
                 self.reset_selected()
 
+    # Hàm này đặt lại trạng thái đã chọn của tất cả các quân cờ trên bàn cờ.
+# Nó duyệt qua tất cả các ô trên bàn cờ, và nếu một ô chứa một quân cờ, nó đặt trạng thái đã chọn của quân cờ đó thành False.
     def reset_selected(self):
         for i in range(self.rows):
             for j in range(self.cols):
                 if self.board[i][j] != 0:
                     self.board[i][j].selected = False
 
-    # Hàm kiểm tra chiếu bí
+    # Hàm này kiểm tra xem người chơi với màu sắc đã cho có bị chiếu bí không.
+# Nó duyệt qua tất cả các ô trên bàn cờ để tìm vị trí của vua của người chơi.
+# Sau đó, nó sử dụng hàm is_checked để kiểm tra xem vua có bị chiếu không.
     def check_mate(self, color):
         if self.is_checked(color):
             king = None
@@ -224,7 +236,10 @@ class Board:
                 return danger_count == len(valid_moves)
 
         return False
-
+    
+    # Hàm này thực hiện việc di chuyển quân cờ trên bàn cờ.
+# Nếu di chuyển hợp lệ, nó sẽ thay đổi lượt chơi và đặt lại trạng thái đã chọn của tất cả các quân cờ.
+# Nếu di chuyển không hợp lệ, nó sẽ đặt trạng thái đã chọn của quân cờ tại vị trí (row, col) thành True.
     def move(self, start, end, color):
         checkedBefore = self.is_checked(color)
         changed = True
