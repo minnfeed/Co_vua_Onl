@@ -78,6 +78,113 @@ class Piece:
     def __str__(self):
         # Trả về một chuỗi biểu diễn cho vị trí của quân cờ, bao gồm hàng và cột
         return str(self.col) + " " + str(self.row)
+class Bishop(Piece):
+    img = 0
+
+    def valid_moves(self, board):
+        # Lấy vị trí hàng và cột của quân Tượng
+        i = self.row
+        j = self.col
+
+        # Danh sách các nước đi hợp lệ
+        moves = []
+
+        # Di chuyển theo đường chéo
+        # Bắt đầu từ vị trí hiện tại của quân Tượng và kiểm tra các ô trên đường chéo có thể di chuyển được
+
+        # Di chuyển theo hướng TOP RIGHT (phía trên bên phải)
+        djL = j + 1
+        djR = j - 1
+        for di in range(i - 1, -1, -1):
+            # Kiểm tra xem cột djL có nằm trong biên của bàn cờ không
+            if djL < 8:
+                # Lấy quân cờ trên ô hiện tại
+                p = board[di][djL]
+                # Nếu ô trống, thêm nước đi này vào danh sách
+                if p == 0:
+                    moves.append((djL, di))
+                # Nếu ô có quân cờ của đối phương, thêm nước đi và kết thúc vòng lặp
+                elif p.color != self.color:
+                    moves.append((djL, di))
+                    break
+                # Nếu gặp quân cờ của chính mình, kết thúc vòng lặp
+                else:
+                    break
+            else:
+                break
+
+            # Di chuyển sang phải trên đường chéo
+            djL += 1
+
+        # Di chuyển theo hướng TOP LEFT (phía trên bên trái)
+        for di in range(i - 1, -1, -1):
+            # Kiểm tra xem cột djR có nằm trong biên của bàn cờ không
+            if djR > -1:
+                # Lấy quân cờ trên ô hiện tại
+                p = board[di][djR]
+                # Nếu ô trống, thêm nước đi này vào danh sách
+                if p == 0:
+                    moves.append((djR, di))
+                # Nếu ô có quân cờ của đối phương, thêm nước đi và kết thúc vòng lặp
+                elif p.color != self.color:
+                    moves.append((djR, di))
+                    break
+                # Nếu gặp quân cờ của chính mình, kết thúc vòng lặp
+                else:
+                    break
+            else:
+                break
+
+            # Di chuyển sang trái trên đường chéo
+            djR -= 1
+
+        # Di chuyển theo hướng BOTTOM LEFT (phía dưới bên trái)
+        djL = j + 1
+        djR = j - 1
+        for di in range(i + 1, 8):
+            # Kiểm tra xem cột djL có nằm trong biên của bàn cờ không
+            if djL < 8:
+                # Lấy quân cờ trên ô hiện tại
+                p = board[di][djL]
+                # Nếu ô trống, thêm nước đi này vào danh sách
+                if p == 0:
+                    moves.append((djL, di))
+                # Nếu ô có quân cờ của đối phương, thêm nước đi và kết thúc vòng lặp
+                elif p.color != self.color:
+                    moves.append((djL, di))
+                    break
+                # Nếu gặp quân cờ của chính mình, kết thúc vòng lặp
+                else:
+                    break
+            else:
+                break
+            # Di chuyển sang phải dưới trên đường chéo
+            djL += 1
+
+        # Di chuyển theo hướng BOTTOM RIGHT (phía dưới bên phải)
+        for di in range(i + 1, 8):
+            # Kiểm tra xem cột djR có nằm trong biên của bàn cờ không
+            if djR > -1:
+                # Lấy quân cờ trên ô hiện tại
+                p = board[di][djR]
+                # Nếu ô trống, thêm nước đi này vào danh sách
+                if p == 0:
+                    moves.append((djR, di))
+                # Nếu ô có quân cờ của đối phương, thêm nước đi và kết thúc vòng lặp
+                elif p.color != self.color:
+                    moves.append((djR, di))
+                    break
+                # Nếu gặp quân cờ của chính mình, kết thúc vòng lặp
+                else:
+                    break
+            else:
+                break
+
+            # Di chuyển sang trái dưới trên đường chéo
+            djR -= 1
+
+        # Trả về danh sách các nước đi hợp lệ
+        return moves
 
 
 
